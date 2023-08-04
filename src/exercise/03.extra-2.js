@@ -10,6 +10,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 import {createResource} from '../utils'
+import '../styles.css'
 
 function PokemonInfo({pokemonResource}) {
   const pokemon = pokemonResource.read()
@@ -25,6 +26,8 @@ function PokemonInfo({pokemonResource}) {
 
 const SUSPENSE_CONFIG = {
   timeoutMs: 4000,
+  busyDelayMs: 300,
+  busyMinDurationMs: 700,
 }
 
 function createPokemonResource(pokemonName) {
@@ -72,7 +75,7 @@ function App() {
     <div className="pokemon-info-app">
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
-      <div className="pokemon-info" style={{opacity: isPending ? 0.6 : 1}}>
+      <div className={`pokemon-info ${isPending ? 'pokemon-loading' : ''}`}>
         {pokemonResource ? (
           <PokemonErrorBoundary
             onReset={handleReset}
