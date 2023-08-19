@@ -4,12 +4,15 @@
 import * as React from 'react'
 import {
   fetchPokemon,
+  getImageUrlForPokemon,
   PokemonInfoFallback,
   PokemonForm,
   PokemonDataView,
   PokemonErrorBoundary,
 } from '../pokemon'
 import {createResource} from '../utils'
+
+window.useRealAPI = true
 
 // ❗❗❗❗
 // 🦉 On this one, make sure that you UNCHECK the "Disable cache" checkbox
@@ -25,23 +28,12 @@ function preloadImage(src) {
   })
 }
 
-const imgSrcResourceCache = {}
-
-function Image({src, alt, ...props}) {
-  let imgSrcResource = imgSrcResourceCache[src]
-  if (!imgSrcResource) {
-    imgSrcResource = createResource(preloadImage(src))
-    imgSrcResourceCache[src] = imgSrcResource
-  }
-  return <img src={imgSrcResource.read()} alt={alt} {...props} />
-}
-
 function PokemonInfo({pokemonResource}) {
-  const pokemon = pokemonResource.read()
+  const pokemon = pokemonResource.data.read()
   return (
     <div>
       <div className="pokemon-info__img-wrapper">
-        <Image src={pokemon.image} alt={pokemon.name} />
+        <img src={pokemonResource.image.read()} alt={pokemon.name} />
       </div>
       <PokemonDataView pokemon={pokemon} />
     </div>
@@ -67,7 +59,9 @@ function getPokemonResource(name) {
 }
 
 function createPokemonResource(pokemonName) {
-  return createResource(fetchPokemon(pokemonName))
+  const data = createResource(fetchPokemon(pokemonName))
+  const image = createResource(preloadImage(getImageUrlForPokemon(pokemonName)))
+  return {data, image}
 }
 
 function App() {
